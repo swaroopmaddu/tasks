@@ -1,0 +1,12 @@
+[programs.localnet]
+tasks = "23kpfZfQpEujrNnnpMTTGGV2NZ2waBmWpTPMb4s3NZ89"
+
+[registry]
+url = "https://anchor.projectserum.com"
+
+[provider]
+cluster = "localnet"
+wallet = "/Users/swaroopmaddu/.config/solana/id.json"
+
+[scripts]
+test = "mocha -t 1000000 tests/"
