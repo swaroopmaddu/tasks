@@ -25,6 +25,13 @@ pub mod tasks {
         Ok(())
     }
 
+    pub fn remove(ctx: Context<Update>,index:u32) -> ProgramResult{        
+        let user_account = &mut ctx.accounts.user_account;
+        user_account.tasks.remove(index as usize);
+        msg!("{:?}",user_account.tasks);
+        Ok(())
+    }
+
 }
 
 #[derive(Accounts)]
@@ -48,9 +55,10 @@ pub struct Update<'info> {
     pub user_account: Account<'info, UserAccount>,
 }
 
-pub struct UpdateTask{
-    pub index:u64,
-    pub task:String
+#[derive(Accounts)]
+pub struct Remove<'info> {
+    #[account(mut)]
+    pub user_account: Account<'info, UserAccount>,
 }
 
 // Define the program owned accounts.

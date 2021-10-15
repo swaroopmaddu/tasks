@@ -53,13 +53,18 @@ const Wallet =(props)=>{
         setUserAccount(user_keypair);
 
         try {
-            let account = await program.account.userAccount.fetch(userAccount.publicKey);
-            if(account!=null){
-                alert("Account already exists");
-                setValue(account.name.toString()); 
-                setDataList(account.tasks);
-                return;
+            try{
+                let account = await program.account.userAccount.fetch(userAccount.publicKey);
+                if (account != null) {
+                    alert("Account already exists");
+                    setValue(account.name.toString());
+                    setDataList(account.tasks);
+                    return;
+                }
+            } catch(err){
+                console.log("account not exists");
             }
+            
 
             /* interact with the program via rpc */
             await program.rpc.initialize(userName.toString(),{
@@ -71,12 +76,13 @@ const Wallet =(props)=>{
                 signers: [userAccount]
             });
 
-            account = await program.account.userAccount.fetch(userAccount.publicKey);
+            const account = await program.account.userAccount.fetch(userAccount.publicKey);
             setValue(account.name.toString());
         } catch (err) {
             console.log("Transaction error: ", err);
         }
     }
+
 
     async function addTask() {
         if (!task) {
@@ -96,13 +102,11 @@ const Wallet =(props)=>{
         setTask('');
     }
 
-    async function update(){
-        const id = 1;
-        const task = "Eigen Vectors";
-        
+    async function update(index,task){
+        console.log("Called upadte function");
         const provider = await getProvider();
         const program = new Program(idl, programID, provider);
-        await program.rpc.update( id,task,{
+        await program.rpc.update( index,task,{
             accounts: {
                 userAccount: userAccount.publicKey
             }
@@ -112,12 +116,26 @@ const Wallet =(props)=>{
         setDataList(account.tasks);
     }
 
+    async function remove(index) {        
+        console.log("Called remove function");
+        const provider = await getProvider();
+        const program = new Program(idl, programID, provider);
+        await program.rpc.remove(index,{
+            accounts: {
+                userAccount: userAccount.publicKey
+            }
+        });
+        const account = await program.account.userAccount.fetch(userAccount.publicKey);
+        setDataList(account.tasks);
+    }
+
+
 
     
     return <div>
                 <AppBar style={{ minHeight: 20 }} justifyContent="space-around" alignItems="center">
                     <Toolbar>
-                        <Typography variant="h5" component="div" style={{ flexGrow: 1 }} align="center"> Decentralized autonomous organization </Typography>
+                        <Typography variant="h5" component="div" style={{ flexGrow: 1 }} align="center"> Task Mate </Typography>
                         <WalletModalProvider >
                             <WalletMultiButton />
                         </WalletModalProvider>
@@ -155,12 +173,11 @@ const Wallet =(props)=>{
                                     />
                                 </Grid>
                                 <Grid item xs={4}>
-                                    <Button variant="contained" onClick={addTask}>Add new Task</Button> &nbsp;&nbsp;&nbsp;&nbsp;
-                                    <Button variant="contained" onClick={update}>Update Task</Button>
+                                    <Button variant="contained" fullWidth onClick={addTask}>Add new Task</Button>
                             </Grid>
                             <ul>
                                 {dataList.map(function (element,index) {
-                                    return (<TodoItem label={element} />)
+                                    return (<TodoItem key={index} index={index} label={element} updatefunc={update} remove={remove} />)
                                 })}
                             </ul>
                             </Grid>
