@@ -42,7 +42,9 @@ solana-test-validator --reset
 ```
 cd app && npm start
 ```
-### Fund your wallet to pay trasaction fees. Replace public key with your wallet public key
+### Don't forgot to fund your wallet to pay trasaction fees. Replace public key with your wallet public key
 ```
 solana airdrop 10 DVcjkvnCuV59RpxxrFbnxHK9rAgfaVriXK3NX51eiv3i
 ``` 
+
+# Now you can see our to-do app running on solana blockchain.
