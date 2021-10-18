@@ -1,13 +1,8 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { AppBar, Button, Grid, TextField, Toolbar, Typography} from '@material-ui/core';
 import { useWallet} from '@solana/wallet-adapter-react';
-import {
-    WalletModalProvider,
-    WalletMultiButton
-} from '@solana/wallet-adapter-react-ui';
-import {
-    Program, Provider, web3
-} from '@project-serum/anchor';
+import { WalletModalProvider, WalletMultiButton } from '@solana/wallet-adapter-react-ui';
+import { Program, Provider, web3 } from '@project-serum/anchor';
 import { Connection, PublicKey } from '@solana/web3.js'; 
 import idl from '../idl.json';
 import TodoItem from './TodoItem';
@@ -20,15 +15,16 @@ const opts = {
 const programID = new PublicKey(idl.metadata.address);
 
 
+
 const Wallet =(props)=>{
     
     const [userAccount,setUserAccount] = useState();
 
     const [value, setValue] = useState('');
     const [userName, setUserName] = useState(''); 
-    const [dataList, setDataList] = useState([]);
+    const [tasksList, setTasksList] = useState([]);
 
-    const [task, setTask] = useState(null);
+    const [task, setTask] = useState('');
     const wallet = useWallet();
  
 
@@ -44,27 +40,25 @@ const Wallet =(props)=>{
         return provider;
     }
 
+    async function createKey() {
+        const provider = await getProvider();
+        /* create an account  */
+        let user_keypair = await Keypair.fromSeed(provider.wallet.publicKey.toBytes());
+        setUserAccount(user_keypair); 
+    }
+
     async function init() {
+
+        if (!userName) {
+            alert("Enter an username to continue");
+            return;
+        }
+
         const provider = await getProvider();
         /* create the program interface combining the idl, program ID, and provider */
         const program = new Program(idl, programID, provider);
-        /* create an account  */
-        let user_keypair = await Keypair.fromSeed(provider.wallet.publicKey.toBytes());
-        setUserAccount(user_keypair);
-
-        try {
-            try{
-                let account = await program.account.userAccount.fetch(userAccount.publicKey);
-                if (account != null) {
-                    alert("Account already exists");
-                    setValue(account.name.toString());
-                    setDataList(account.tasks);
-                    return;
-                }
-            } catch(err){
-                console.log("account not exists");
-            }
-            
+        
+        try {    
 
             /* interact with the program via rpc */
             await program.rpc.initialize(userName.toString(),{
@@ -91,14 +85,19 @@ const Wallet =(props)=>{
         }
         const provider = await getProvider();
         const program = new Program(idl, programID, provider);
-        await program.rpc.add(task, {
-            accounts: {
-                userAccount: userAccount.publicKey
-            }
-        });
+        try {
+            await program.rpc.add(task, {
+                accounts: {
+                    userAccount: userAccount.publicKey
+                }
+            });
+        } catch (error) {
+            setTask('');
+            return;
+        }
 
         const account = await program.account.userAccount.fetch(userAccount.publicKey);
-        setDataList(account.tasks);
+        setTasksList(account.tasks);
         setTask('');
     }
 
@@ -106,29 +105,65 @@ const Wallet =(props)=>{
         console.log("Called upadte function");
         const provider = await getProvider();
         const program = new Program(idl, programID, provider);
-        await program.rpc.update( index,task,{
-            accounts: {
-                userAccount: userAccount.publicKey
-            }
-        });
+        try {
+            await program.rpc.update(index, task, {
+                accounts: {
+                    userAccount: userAccount.publicKey
+                }
+            });
+        } catch (error) {
+            return;
+        }
 
         const account = await program.account.userAccount.fetch(userAccount.publicKey);
-        setDataList(account.tasks);
+        setTasksList(account.tasks);
     }
 
     async function remove(index) {        
         console.log("Called remove function");
         const provider = await getProvider();
         const program = new Program(idl, programID, provider);
-        await program.rpc.remove(index,{
-            accounts: {
-                userAccount: userAccount.publicKey
-            }
-        });
+        try {
+            await program.rpc.remove(index, {
+                accounts: {
+                    userAccount: userAccount.publicKey
+                }
+            });
+        } catch (error) {
+            return;
+        }
         const account = await program.account.userAccount.fetch(userAccount.publicKey);
-        setDataList(account.tasks);
+        setTasksList(account.tasks);
     }
 
+    useEffect(()=>{
+        if(wallet.connected) createKey();
+        else {
+            setValue('');
+            setTasksList([]);
+            setTask('');
+            setUserAccount();
+            setUserName('');
+        }
+    }, [wallet]);
+
+    useEffect(()=>{
+        console.log("Abcd");
+        (async function checkAccount() {
+            const provider = await getProvider();
+            const program = new Program(idl, programID, provider);
+            try {
+                let account = await program.account.userAccount.fetch(userAccount.publicKey);
+                if (account != null) {
+                    setValue(account.name.toString());
+                    setTasksList(account.tasks);
+                    return;
+                }
+            } catch (err) {
+                console.log("account not exists: ", err);
+            }
+        })();
+    },[userAccount]);
 
 
     
@@ -148,7 +183,7 @@ const Wallet =(props)=>{
                                 <Grid item xs={8}>
                                 <TextField fullWidth
                                     helperText="Please enter prefered username"
-                                    id="username"
+                                    id="userName"
                                     label="Name"
                                     value={userName}
                                     onChange={e =>setUserName(e.target.value)}
@@ -176,7 +211,7 @@ const Wallet =(props)=>{
                                     <Button variant="contained" fullWidth onClick={addTask}>Add new Task</Button>
                             </Grid>
                             <ul>
-                                {dataList.map(function (element,index) {
+                                {tasksList.map(function (element,index) {
                                     return (<TodoItem key={index} index={index} label={element} updatefunc={update} remove={remove} />)
                                 })}
                             </ul>
