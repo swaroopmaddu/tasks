@@ -29,6 +29,17 @@ anchor build
 ```
 anchor deploy
 ```
+### We can now update the program IDs in lib.rs:
+```
+declare_id!("your-program-id");
+```
+### And also in Anchor.toml:
+```
+# Anchor.toml
+[programs.localnet]
+mysolanaapp = "your-program-id"
+```
+
 ### Copy IDL to app folder 
 
 ```
