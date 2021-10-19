@@ -29,11 +29,10 @@ const Wallet =(props)=>{
  
 
     async function getProvider() {
-        /* create the provider and return it to the caller */
         /* network set to local network for now */
         const network = "http://127.0.0.1:8899";
         const connection = new Connection(network, opts.preflightCommitment);
-
+        /* create the provider and return it to the caller */
         const provider = new Provider(
             connection, wallet, opts.preflightCommitment,
         );
@@ -59,7 +58,6 @@ const Wallet =(props)=>{
         const program = new Program(idl, programID, provider);
         
         try {    
-
             /* interact with the program via rpc */
             await program.rpc.initialize(userName.toString(),{
                 accounts: {
@@ -114,13 +112,11 @@ const Wallet =(props)=>{
         } catch (error) {
             return;
         }
-
         const account = await program.account.userAccount.fetch(userAccount.publicKey);
         setTasksList(account.tasks);
     }
 
     async function remove(index) {        
-        console.log("Called remove function");
         const provider = await getProvider();
         const program = new Program(idl, programID, provider);
         try {
@@ -132,9 +128,16 @@ const Wallet =(props)=>{
         } catch (error) {
             return;
         }
+        setTasksList([]);
         const account = await program.account.userAccount.fetch(userAccount.publicKey);
-        setTasksList(account.tasks);
+        const copy = [...account.tasks];
+        setTasksList(copy);
     }
+
+    useEffect(()=>{
+        console.log(tasksList);
+        setTasksList(tasksList);
+    },[tasksList]);
 
     useEffect(()=>{
         if(wallet.connected) createKey();
@@ -148,7 +151,6 @@ const Wallet =(props)=>{
     }, [wallet]);
 
     useEffect(()=>{
-        console.log("Abcd");
         (async function checkAccount() {
             const provider = await getProvider();
             const program = new Program(idl, programID, provider);
@@ -211,7 +213,7 @@ const Wallet =(props)=>{
                                     <Button variant="contained" fullWidth onClick={addTask}>Add new Task</Button>
                             </Grid>
                             <ul>
-                                {tasksList.map(function (element,index) {
+                                {tasksList.map( (element,index)=> {
                                     return (<TodoItem key={index} index={index} label={element} updatefunc={update} remove={remove} />)
                                 })}
                             </ul>
