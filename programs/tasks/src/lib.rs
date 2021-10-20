@@ -8,7 +8,6 @@ pub mod tasks {
     use super::*;
     pub fn initialize(ctx: Context<Initialize>,name:String) -> ProgramResult {
         let user_account = &mut ctx.accounts.user_account;
-        user_account.id = 1024;
         user_account.name = name;
         Ok(())
     }
@@ -36,7 +35,7 @@ pub mod tasks {
 
 #[derive(Accounts)]
 pub struct Initialize<'info> {
-    #[account(init,payer=user,space=16+64+64)]
+    #[account(init,payer=user,space=8+64+64)]
     pub user_account: Account<'info, UserAccount>,
     #[account(mut)]
     pub user: Signer<'info>,
@@ -64,7 +63,6 @@ pub struct Remove<'info> {
 // Define the program owned accounts.
 #[account]
 pub struct UserAccount {
-    pub id: u64,
     pub name: String,
     pub tasks: Vec<String>
 }
