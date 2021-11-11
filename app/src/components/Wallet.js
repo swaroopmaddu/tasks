@@ -8,7 +8,6 @@ import idl from '../idl.json';
 import TodoItem from './TodoItem';
 
 const { SystemProgram, Keypair } = web3;
-
 const opts = {
     preflightCommitment: "processed"
 };
@@ -29,8 +28,8 @@ const Wallet =(props)=>{
  
 
     async function getProvider() {
-        /* network set to local network for now */
-        const network = "http://127.0.0.1:8899";
+        /* network set to dev network */
+        const network = "https://api.devnet.solana.com";
         const connection = new Connection(network, opts.preflightCommitment);
         /* create the provider and return it to the caller */
         const provider = new Provider(
@@ -172,7 +171,7 @@ const Wallet =(props)=>{
     return <div>
                 <AppBar style={{ minHeight: 20 }} justifyContent="space-around" alignItems="center">
                     <Toolbar>
-                        <Typography variant="h5" component="div" style={{ flexGrow: 1 }} align="center"> Task Mate </Typography>
+                        <Typography variant="h5" component="div" style={{ flexGrow: 1 }} align="center"> SOLDO TaskMate </Typography>
                         <WalletModalProvider >
                             <WalletMultiButton />
                         </WalletModalProvider>

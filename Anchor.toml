@@ -1,11 +1,11 @@
-[programs.localnet]
-tasks = "23kpfZfQpEujrNnnpMTTGGV2NZ2waBmWpTPMb4s3NZ89"
+[programs.devnet]
+tasks = "EJuRXDLaqc2bVrqPwq4WPwXDEiXyatomKzN6g8zgo2Th"
 
 [registry]
 url = "https://anchor.projectserum.com"
 
 [provider]
-cluster = "localnet"
+cluster = "devnet"
 wallet = "/Users/swaroopmaddu/.config/solana/id.json"
 
 [scripts]
