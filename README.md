@@ -1,5 +1,6 @@
 # Solana Anchor Curd
-### A simple to-do list application in solana blockchain
+## A simple to-do list application in solana blockchain
+## Check live demo here [SolDo](https://soldo.vercel.app/)
 
 ## Prerequisites
 
